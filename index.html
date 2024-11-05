@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <title>Flappy Bird</title>
   <style>
     body, html {
@@ -22,42 +22,43 @@
     #startButton, #restartButton {
       position: absolute;
       font-size: 20px;
-      padding: 10px 20px;
+      padding: 15px 30px;
       background-color: #ffcc00;
       border: none;
       cursor: pointer;
-      display: none; /* Initially hidden */
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s;
+      z-index: 100;
     }
-    #startButton {
-      top: 50%;
-      transform: translateY(-50%);
-    }
-    #restartButton {
-      top: 50%;
-      transform: translateY(-50%);
+    @media (max-width: 600px) {
+      #startButton, #restartButton {
+        font-size: 24px;
+        padding: 20px 40px;
+      }
     }
   </style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="320" height="480"></canvas>
+  <canvas id="gameCanvas"></canvas>
   <button id="startButton">Start Game</button>
   <button id="restartButton">Restart Game</button>
 
   <script>
-    // Set up canvas
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Game variables
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
     const GRAVITY = 0.10;
     const FLAP_STRENGTH = -3;
     const SPAWN_RATE = 100;
     const PIPE_DISTANCE = 250;
-
-    const INITIAL_PIPE_SPEED = 1; // Initial pipe speed
-    const PIPE_SPEED_INCREMENT = 0.1; // How much to increase pipe speed every 5 points
-    const INITIAL_PIPE_GAP = 200; // Initial pipe gap
-    const PIPE_GAP_DECREASE = 10; // How much to decrease the gap after every 5 points
+    const INITIAL_PIPE_SPEED = 1;
+    const PIPE_SPEED_INCREMENT = 0.1;
+    const INITIAL_PIPE_GAP = 200;
+    const PIPE_GAP_DECREASE = 10;
 
     let birdY = canvas.height / 2;
     let birdVelocity = 0;
@@ -65,17 +66,13 @@
     let score = 0;
     let gameOver = false;
     let gameStarted = false;
-    let countdownTimer = 3; // Set initial countdown value to 3 seconds
+    let countdownTimer = 3;
     let countdownInterval;
 
-    // Bird image (replace with a valid path or use a simpler path for testing)
     const birdImage = new Image();
-    birdImage.src = 'bird.jpg'; // Replace this with a simple image path (check path)
+    birdImage.src = 'bird.jpg'; 
 
-    // Ensure the image is fully loaded before starting the game
     birdImage.onload = function() {
-      console.log("Bird image loaded!");
-      // Show the start button once the image is ready
       showStartButton();
     };
 
@@ -83,28 +80,23 @@
       alert("Error loading image. Please check the path.");
     };
 
-    // Bird object
     const bird = {
       x: 50,
       y: birdY,
       width: 34,
-      height: 40, // Increased height of the bird
+      height: 40,
       draw: function() {
         if (birdImage.complete) {
           ctx.drawImage(birdImage, this.x, this.y, this.width, this.height);
         } else {
           ctx.fillStyle = 'yellow';
-          ctx.fillRect(this.x, this.y, this.width, this.height); // Fallback to simple bird shape
+          ctx.fillRect(this.x, this.y, this.width, this.height); 
         }
       },
       flap: function() {
         birdVelocity = FLAP_STRENGTH;
       }
     };
-
-    // Pipe object
-    let pipeSpeed = INITIAL_PIPE_SPEED;
-    let pipeGap = INITIAL_PIPE_GAP;
 
     function Pipe(lastPipeX) {
       this.width = 50;
@@ -114,78 +106,63 @@
 
       this.draw = function() {
         ctx.fillStyle = 'green';
-        ctx.fillRect(this.x, 0, this.width, this.height); // Upper pipe
-        ctx.fillRect(this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap)); // Lower pipe
+        ctx.fillRect(this.x, 0, this.width, this.height); 
+        ctx.fillRect(this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap)); 
       };
 
       this.update = function() {
-        this.x -= pipeSpeed; // Move pipes faster as speed increases
+        this.x -= pipeSpeed;
       };
     }
 
-    // Update game difficulty based on score
     function updateGameDifficulty() {
-      if (score % 5 === 0) { // Every 5 points
-        pipeSpeed += PIPE_SPEED_INCREMENT; // Increase speed of pipes
+      if (score % 5 === 0) {
+        pipeSpeed += PIPE_SPEED_INCREMENT;
         if (pipeGap > 50) {
-          pipeGap -= PIPE_GAP_DECREASE; // Decrease the gap, making pipes closer together
+          pipeGap -= PIPE_GAP_DECREASE;
         }
       }
     }
 
-    // Show the start button
     function showStartButton() {
       document.getElementById('startButton').style.display = 'block';
     }
 
-    // Show the restart button
     function showRestartButton() {
       document.getElementById('restartButton').style.display = 'block';
     }
 
-    // Hide buttons
     function hideButtons() {
       document.getElementById('startButton').style.display = 'none';
       document.getElementById('restartButton').style.display = 'none';
     }
 
-    // Game Over message on canvas
     function gameOverMessage() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = 'black';
       ctx.font = '30px Arial';
       ctx.fillText('Game Over!', canvas.width / 2 - 80, canvas.height / 2 - 30);
-
-      // Display score just below the Game Over message
       ctx.font = '20px Arial';
       ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 10);
-
-      showRestartButton(); // Show the restart button after game over
+      showRestartButton();
     }
 
-    // Draw function to update game
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw bird
       bird.draw();
-
-      // Update bird position
       birdVelocity += GRAVITY;
       bird.y += birdVelocity;
-
-      // Prevent bird from going off screen
+      
       if (bird.y < 0) bird.y = 0;
       if (bird.y + bird.height > canvas.height) {
         bird.y = canvas.height - bird.height;
         if (!gameOver) {
           gameOver = true;
-          gameOverMessage(); // Display game over message on the canvas
+          gameOverMessage();
           return;
         }
       }
 
-      // Update and draw pipes
       if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - SPAWN_RATE) {
         const lastPipeX = pipes.length > 0 ? pipes[pipes.length - 1].x : canvas.width;
         pipes.push(new Pipe(lastPipeX));
@@ -195,49 +172,43 @@
         pipes[i].draw();
         pipes[i].update();
 
-        // Check for collisions
         if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + pipes[i].width) {
           if (bird.y < pipes[i].height || bird.y + bird.height > pipes[i].height + pipes[i].gap) {
             gameOver = true;
-            gameOverMessage(); // Display game over message on the canvas
+            gameOverMessage();
           }
         }
 
-        // Remove pipes that are off-screen
         if (pipes[i].x + pipes[i].width < 0) {
           pipes.splice(i, 1);
           score++;
-          updateGameDifficulty(); // Increase difficulty based on score
+          updateGameDifficulty();
         }
       }
 
-      // Display score
       ctx.fillStyle = 'black';
       ctx.font = '20px Arial';
       ctx.fillText('Score: ' + score, 10, 30);
     }
 
-    // Countdown timer before game starts
     function startCountdown() {
       document.getElementById('startButton').style.display = 'none';
       gameStarted = false;
 
-      // Show a countdown on the screen
       countdownInterval = setInterval(function() {
         if (countdownTimer > 0) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.fillStyle = 'black';
           ctx.font = '30px Arial';
           ctx.fillText(countdownTimer, canvas.width / 2 - 15, canvas.height / 2);
           countdownTimer--;
         } else {
-          clearInterval(countdownInterval); // Stop the countdown
-          startGame(); // Start the game after countdown
+          clearInterval(countdownInterval);
+          startGame();
         }
       }, 1000);
     }
 
-    // Start the game
     function startGame() {
       hideButtons();
       gameStarted = true;
@@ -246,27 +217,35 @@
       birdVelocity = 0;
       pipes = [];
       score = 0;
-      pipeSpeed = INITIAL_PIPE_SPEED; // Reset pipe speed
-      pipeGap = INITIAL_PIPE_GAP; // Reset pipe gap
-      countdownTimer = 3; // Reset countdown timer for restart
+      pipeSpeed = INITIAL_PIPE_SPEED;
+      pipeGap = INITIAL_PIPE_GAP;
+      countdownTimer = 3;
       gameLoop();
     }
 
-    // Restart the game
     function restartGame() {
       hideButtons();
-      startCountdown(); // Show countdown when restarting
+      startCountdown();
     }
 
-    // Listen for user input (flap)
     document.addEventListener('keydown', function(e) {
       if ((e.key === ' ' || e.key === 'ArrowUp') && !gameOver) {
-        if (!gameStarted) return; // Don't flap if the game hasn't started
+        if (!gameStarted) return;
         bird.flap();
       }
     });
 
-    // Game loop
+    // Mobile touch support
+    document.addEventListener('touchstart', function(e) {
+      if (!gameStarted || gameOver) return;
+      bird.flap();
+    });
+
+    window.addEventListener('resize', function() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
     function gameLoop() {
       if (gameStarted && !gameOver) {
         draw();
@@ -274,12 +253,10 @@
       }
     }
 
-    // Start button click event now triggers the countdown
     document.getElementById('startButton').addEventListener('click', function() {
       startCountdown();
     });
 
-    // Restart button click event
     document.getElementById('restartButton').addEventListener('click', function() {
       restartGame();
     });
