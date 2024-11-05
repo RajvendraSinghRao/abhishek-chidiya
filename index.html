@@ -155,7 +155,11 @@
       ctx.fillStyle = 'black';
       ctx.font = '30px Arial';
       ctx.fillText('Game Over!', canvas.width / 2 - 80, canvas.height / 2 - 30);
+
+      // Display score just below the Game Over message
+      ctx.font = '20px Arial';
       ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 10);
+
       showRestartButton(); // Show the restart button after game over
     }
 
