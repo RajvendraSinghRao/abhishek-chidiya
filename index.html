@@ -244,21 +244,14 @@
       score = 0;
       pipeSpeed = INITIAL_PIPE_SPEED; // Reset pipe speed
       pipeGap = INITIAL_PIPE_GAP; // Reset pipe gap
+      countdownTimer = 3; // Reset countdown timer for restart
       gameLoop();
     }
 
     // Restart the game
     function restartGame() {
       hideButtons();
-      gameStarted = true;
-      gameOver = false;
-      bird.y = birdY;
-      birdVelocity = 0;
-      pipes = [];
-      score = 0;
-      pipeSpeed = INITIAL_PIPE_SPEED; // Reset pipe speed
-      pipeGap = INITIAL_PIPE_GAP; // Reset pipe gap
-      gameLoop();
+      startCountdown(); // Show countdown when restarting
     }
 
     // Listen for user input (flap)
