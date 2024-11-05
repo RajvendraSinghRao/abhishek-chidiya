@@ -19,10 +19,11 @@
     }
     canvas {
       border: 2px solid black;
+      display: block;
     }
     #startButton, #restartButton {
       position: absolute;
-      font-size: 20px;
+      font-size: 18px;
       padding: 15px 30px;
       background-color: #ffcc00;
       border: none;
@@ -31,6 +32,12 @@
       opacity: 0;
       transition: opacity 0.5s ease;
       z-index: 100;
+    }
+    #startButton:hover, #restartButton:hover {
+      background-color: #ff9900;
+    }
+    #startButton:active, #restartButton:active {
+      background-color: #cc7a00;
     }
     @media (max-width: 600px) {
       #startButton, #restartButton {
@@ -46,24 +53,21 @@
   <button id="restartButton">Restart Game</button>
 
   <script>
-    // Setup canvas
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-
+    
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Game Constants
     const GRAVITY = 0.10;
     const FLAP_STRENGTH = -3;
     const SPAWN_RATE = 100;
     const PIPE_DISTANCE = 250;
     const INITIAL_PIPE_SPEED = 1.5;
-    const PIPE_SPEED_INCREMENT = 0.1;
+    const PIPE_SPEED_INCREMENT = 0.05;
     const INITIAL_PIPE_GAP = 200;
-    const PIPE_GAP_DECREASE = 10;
+    const PIPE_GAP_DECREASE = 1;
 
-    // Game variables
     let birdY = canvas.height / 2;
     let birdVelocity = 0;
     let pipes = [];
@@ -73,20 +77,17 @@
     let countdownTimer = 3;
     let countdownInterval;
 
-    // Bird image
     const birdImage = new Image();
-    birdImage.src = 'bird.jpg'; // Add your bird image path here
+    birdImage.src = 'bird.jpg'; 
 
-    // Ensure the bird image is loaded before starting the game
     birdImage.onload = function() {
-      showStartButton();  // Show start button once the image is loaded
+      showStartButton();  
     };
 
     birdImage.onerror = function() {
-      alert("Error loading bird image. Please check the path.");
+      alert("Error loading bird image. Using fallback.");
     };
 
-    // Bird object
     const bird = {
       x: 50,
       y: birdY,
@@ -97,7 +98,7 @@
           ctx.drawImage(birdImage, this.x, this.y, this.width, this.height);
         } else {
           ctx.fillStyle = 'yellow';
-          ctx.fillRect(this.x, this.y, this.width, this.height);  // Fallback to a rectangle for the bird
+          ctx.fillRect(this.x, this.y, this.width, this.height);  
         }
       },
       flap: function() {
@@ -105,7 +106,6 @@
       }
     };
 
-    // Pipe object
     let pipeSpeed = INITIAL_PIPE_SPEED;
     let pipeGap = INITIAL_PIPE_GAP;
 
@@ -117,46 +117,39 @@
 
       this.draw = function() {
         ctx.fillStyle = 'green';
-        ctx.fillRect(this.x, 0, this.width, this.height);  // Upper pipe
-        ctx.fillRect(this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap));  // Lower pipe
+        ctx.fillRect(this.x, 0, this.width, this.height);  
+        ctx.fillRect(this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap)); 
       };
 
       this.update = function() {
-        this.x -= pipeSpeed;  // Move pipes leftwards
+        this.x -= pipeSpeed;
       };
     }
 
-    // Update game difficulty based on score
     function updateGameDifficulty() {
-      if (score % 5 === 0) {  // Every 5 points
-        pipeSpeed += PIPE_SPEED_INCREMENT;  // Increase pipe speed
-        if (pipeGap > 50) {
-          pipeGap -= PIPE_GAP_DECREASE;  // Decrease the gap between pipes
-        }
+      if (score % 2 === 0) {
+        pipeSpeed += PIPE_SPEED_INCREMENT;  
+        pipeGap = Math.max(100, pipeGap - PIPE_GAP_DECREASE);  
       }
     }
 
-    // Show the start button
     function showStartButton() {
       document.getElementById('startButton').style.display = 'block';
       document.getElementById('startButton').style.opacity = '1';
     }
 
-    // Show the restart button
     function showRestartButton() {
       document.getElementById('restartButton').style.display = 'block';
       document.getElementById('restartButton').style.opacity = '1';
     }
 
-    // Hide buttons
     function hideButtons() {
       document.getElementById('startButton').style.display = 'none';
       document.getElementById('restartButton').style.display = 'none';
     }
 
-    // Display game over message
     function gameOverMessage() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = 'black';
       ctx.font = '30px Arial';
       ctx.fillText('Game Over!', canvas.width / 2 - 80, canvas.height / 2 - 30);
@@ -164,31 +157,27 @@
       ctx.font = '20px Arial';
       ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 10);
 
-      showRestartButton();  // Show restart button after game over
+      showRestartButton();  
     }
 
-    // Main draw function
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      bird.draw();  // Draw bird
+      bird.draw();
 
-      // Update bird position
       birdVelocity += GRAVITY;
       bird.y += birdVelocity;
 
-      // Prevent bird from going off screen
       if (bird.y < 0) bird.y = 0;
       if (bird.y + bird.height > canvas.height) {
         bird.y = canvas.height - bird.height;
         if (!gameOver) {
           gameOver = true;
-          gameOverMessage();  // Show game over message
+          gameOverMessage(); 
           return;
         }
       }
 
-      // Create pipes
       if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - SPAWN_RATE) {
         const lastPipeX = pipes.length > 0 ? pipes[pipes.length - 1].x : canvas.width;
         pipes.push(new Pipe(lastPipeX));
@@ -198,31 +187,27 @@
         pipes[i].draw();
         pipes[i].update();
 
-        // Check for collisions
         if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + pipes[i].width) {
           if (bird.y < pipes[i].height || bird.y + bird.height > pipes[i].height + pipes[i].gap) {
             gameOver = true;
-            gameOverMessage();  // Display game over message
+            gameOverMessage();
           }
         }
 
-        // Remove pipes that are off-screen
         if (pipes[i].x + pipes[i].width < 0) {
           pipes.splice(i, 1);
           score++;
-          updateGameDifficulty();  // Increase difficulty as score increases
+          updateGameDifficulty();
         }
       }
 
-      // Display score
       ctx.fillStyle = 'black';
       ctx.font = '20px Arial';
       ctx.fillText('Score: ' + score, 10, 30);
     }
 
-    // Start countdown before game begins
     function startCountdown() {
-      document.getElementById('startButton').style.display = 'none';  // Hide start button
+      document.getElementById('startButton').style.display = 'none';  
       gameStarted = false;
 
       countdownInterval = setInterval(function() {
@@ -234,12 +219,11 @@
           countdownTimer--;
         } else {
           clearInterval(countdownInterval);
-          startGame();  // Start game after countdown finishes
+          startGame();
         }
       }, 1000);
     }
 
-    // Start the game
     function startGame() {
       hideButtons();
       gameStarted = true;
@@ -254,13 +238,11 @@
       gameLoop();
     }
 
-    // Restart the game
     function restartGame() {
       hideButtons();
-      startCountdown();  // Start countdown when restarting
+      startCountdown();
     }
 
-    // Listen for user input (flap)
     document.addEventListener('keydown', function(e) {
       if ((e.key === ' ' || e.key === 'ArrowUp') && !gameOver) {
         if (!gameStarted) return;
@@ -268,19 +250,16 @@
       }
     });
 
-    // Mobile touch support
     document.addEventListener('touchstart', function(e) {
       if (!gameStarted || gameOver) return;
       bird.flap();
     });
 
-    // Resize canvas on window resize
     window.addEventListener('resize', function() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     });
 
-    // Game loop
     function gameLoop() {
       if (gameStarted && !gameOver) {
         draw();
@@ -288,7 +267,6 @@
       }
     }
 
-    // Start and restart button events
     document.getElementById('startButton').addEventListener('click', function() {
       startCountdown();
     });
