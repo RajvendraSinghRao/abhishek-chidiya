@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flappy Bird</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #70c5ce;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    canvas {
+      border: 2px solid black;
+    }
+    #startButton, #restartButton {
+      position: absolute;
+      font-size: 20px;
+      padding: 10px 20px;
+      background-color: #ffcc00;
+      border: none;
+      cursor: pointer;
+      display: none; /* Initially hidden */
+    }
+    #startButton {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    #restartButton {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="320" height="480"></canvas>
+  <button id="startButton">Start Game</button>
+  <button id="restartButton">Restart Game</button>
+
+  <script>
+    // Set up canvas
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Game variables
+    const GRAVITY = 0.10;
+    const FLAP_STRENGTH = -3;
+    const SPAWN_RATE = 100;
+    const PIPE_SPEED = 1;
+    const PIPE_GAP = 200;
+    const PIPE_DISTANCE = 250;
+
+    let birdY = canvas.height / 2;
+    let birdVelocity = 0;
+    let pipes = [];
+    let score = 0;
+    let gameOver = false;
+    let gameStarted = false;
+
+    // Bird image (replace with a valid path or use a simpler path for testing)
+    const birdImage = new Image();
+    birdImage.src = 'images/bird.jpg'; // Replace this with a simple image path (check path)
+
+    // Ensure the image is fully loaded before starting the game
+    birdImage.onload = function() {
+      console.log("Bird image loaded!");
+      // Show the start button once the image is ready
+      showStartButton();
+    };
+
+    birdImage.onerror = function() {
+      alert("Error loading image. Please check the path.");
+    };
+
+    // Bird object
+    const bird = {
+      x: 50,
+      y: birdY,
+      width: 34,
+      height: 24,
+      draw: function() {
+        ctx.drawImage(birdImage, this.x, this.y, this.width, this.height);
+      },
+      flap: function() {
+        birdVelocity = FLAP_STRENGTH;
+      }
+    };
+
+    // Pipe object
+    function Pipe(lastPipeX) {
+      this.width = 50;
+      this.height = Math.floor(Math.random() * (canvas.height - PIPE_GAP)) + 50;
+      this.x = lastPipeX + PIPE_DISTANCE;
+      this.gap = PIPE_GAP;
+
+      this.draw = function() {
+        ctx.fillStyle = 'green';
+        ctx.fillRect(this.x, 0, this.width, this.height); // Upper pipe
+        ctx.fillRect(this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap)); // Lower pipe
+      };
+
+      this.update = function() {
+        this.x -= PIPE_SPEED;
+      };
+    }
+
+    // Draw function to update game
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw bird
+      bird.draw();
+
+      // Update bird position
+      birdVelocity += GRAVITY;
+      bird.y += birdVelocity;
+
+      // Prevent bird from going off screen
+      if (bird.y < 0) bird.y = 0;
+      if (bird.y + bird.height > canvas.height) {
+        bird.y = canvas.height - bird.height;
+        if (!gameOver) {
+          gameOver = true;
+          showRestartButton();
+          alert('Game Over! Your score: ' + score);
+        }
+      }
+
+      // Draw and update pipes
+      if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - SPAWN_RATE) {
+        const lastPipeX = pipes.length > 0 ? pipes[pipes.length - 1].x : canvas.width;
+        pipes.push(new Pipe(lastPipeX));
+      }
+
+      for (let i = pipes.length - 1; i >= 0; i--) {
+        pipes[i].draw();
+        pipes[i].update();
+
+        // Check for collisions
+        if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + pipes[i].width) {
+          if (bird.y < pipes[i].height || bird.y + bird.height > pipes[i].height + pipes[i].gap) {
+            gameOver = true;
+            showRestartButton();
+            alert('Game Over! Your score: ' + score);
+          }
+        }
+
+        // Remove pipes that are off-screen
+        if (pipes[i].x + pipes[i].width < 0) {
+          pipes.splice(i, 1);
+          score++;
+        }
+      }
+
+      // Display score
+      ctx.fillStyle = 'black';
+      ctx.font = '20px Arial';
+      ctx.fillText('Score: ' + score, 10, 30);
+    }
+
+    // Show the start button
+    function showStartButton() {
+      document.getElementById('startButton').style.display = 'block';
+    }
+
+    // Show the restart button
+    function showRestartButton() {
+      document.getElementById('restartButton').style.display = 'block';
+    }
+
+    // Hide buttons
+    function hideButtons() {
+      document.getElementById('startButton').style.display = 'none';
+      document.getElementById('restartButton').style.display = 'none';
+    }
+
+    // Start the game
+    function startGame() {
+      hideButtons();
+      gameStarted = true;
+      gameOver = false;
+      bird.y = birdY;
+      birdVelocity = 0;
+      pipes = [];
+      score = 0;
+      gameLoop();
+    }
+
+    // Restart the game
+    function restartGame() {
+      hideButtons();
+      gameStarted = true;
+      gameOver = false;
+      bird.y = birdY;
+      birdVelocity = 0;
+      pipes = [];
+      score = 0;
+      gameLoop();
+    }
+
+    // Listen for user input (flap)
+    document.addEventListener('keydown', function(e) {
+      if ((e.key === ' ' || e.key === 'ArrowUp') && !gameOver) {
+        if (!gameStarted) return; // Don't flap if the game hasn't started
+        bird.flap();
+      }
+    });
+
+    // Game loop
+    function gameLoop() {
+      if (gameStarted && !gameOver) {
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    // Start button click event
+    document.getElementById('startButton').addEventListener('click', function() {
+      startGame();
+    });
+
+    // Restart button click event
+    document.getElementById('restartButton').addEventListener('click', function() {
+      restartGame();
+    });
+  </script>
+</body>
+</html>
