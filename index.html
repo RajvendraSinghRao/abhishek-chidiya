@@ -52,9 +52,12 @@
     const GRAVITY = 0.10;
     const FLAP_STRENGTH = -3;
     const SPAWN_RATE = 100;
-    const PIPE_SPEED = 1;
-    const PIPE_GAP = 200;
     const PIPE_DISTANCE = 250;
+
+    const INITIAL_PIPE_SPEED = 1; // Initial pipe speed
+    const PIPE_SPEED_INCREMENT = 0.1; // How much to increase pipe speed every 5 points
+    const INITIAL_PIPE_GAP = 200; // Initial pipe gap
+    const PIPE_GAP_DECREASE = 10; // How much to decrease the gap after every 5 points
 
     let birdY = canvas.height / 2;
     let birdVelocity = 0;
@@ -62,6 +65,8 @@
     let score = 0;
     let gameOver = false;
     let gameStarted = false;
+    let countdownTimer = 3; // Set initial countdown value to 3 seconds
+    let countdownInterval;
 
     // Bird image (replace with a valid path or use a simpler path for testing)
     const birdImage = new Image();
@@ -83,9 +88,14 @@
       x: 50,
       y: birdY,
       width: 34,
-      height: 24,
+      height: 40, // Increased height of the bird
       draw: function() {
-        ctx.drawImage(birdImage, this.x, this.y, this.width, this.height);
+        if (birdImage.complete) {
+          ctx.drawImage(birdImage, this.x, this.y, this.width, this.height);
+        } else {
+          ctx.fillStyle = 'yellow';
+          ctx.fillRect(this.x, this.y, this.width, this.height); // Fallback to simple bird shape
+        }
       },
       flap: function() {
         birdVelocity = FLAP_STRENGTH;
@@ -93,11 +103,14 @@
     };
 
     // Pipe object
+    let pipeSpeed = INITIAL_PIPE_SPEED;
+    let pipeGap = INITIAL_PIPE_GAP;
+
     function Pipe(lastPipeX) {
       this.width = 50;
-      this.height = Math.floor(Math.random() * (canvas.height - PIPE_GAP)) + 50;
+      this.height = Math.floor(Math.random() * (canvas.height - pipeGap)) + 50;
       this.x = lastPipeX + PIPE_DISTANCE;
-      this.gap = PIPE_GAP;
+      this.gap = pipeGap;
 
       this.draw = function() {
         ctx.fillStyle = 'green';
@@ -106,8 +119,43 @@
       };
 
       this.update = function() {
-        this.x -= PIPE_SPEED;
+        this.x -= pipeSpeed; // Move pipes faster as speed increases
       };
+    }
+
+    // Update game difficulty based on score
+    function updateGameDifficulty() {
+      if (score % 5 === 0) { // Every 5 points
+        pipeSpeed += PIPE_SPEED_INCREMENT; // Increase speed of pipes
+        if (pipeGap > 50) {
+          pipeGap -= PIPE_GAP_DECREASE; // Decrease the gap, making pipes closer together
+        }
+      }
+    }
+
+    // Show the start button
+    function showStartButton() {
+      document.getElementById('startButton').style.display = 'block';
+    }
+
+    // Show the restart button
+    function showRestartButton() {
+      document.getElementById('restartButton').style.display = 'block';
+    }
+
+    // Hide buttons
+    function hideButtons() {
+      document.getElementById('startButton').style.display = 'none';
+      document.getElementById('restartButton').style.display = 'none';
+    }
+
+    // Game Over message on canvas
+    function gameOverMessage() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+      ctx.fillStyle = 'black';
+      ctx.font = '30px Arial';
+      ctx.fillText('Game Over!', canvas.width / 2 - 80, canvas.height / 2 - 30);
+      ctx.fillText('Score: ' + score, canvas.width / 2 - 50, canvas.height / 2 + 10);
     }
 
     // Draw function to update game
@@ -127,12 +175,12 @@
         bird.y = canvas.height - bird.height;
         if (!gameOver) {
           gameOver = true;
-          showRestartButton();
-          alert('Game Over! Your score: ' + score);
+          gameOverMessage(); // Display game over message on the canvas
+          return;
         }
       }
 
-      // Draw and update pipes
+      // Update and draw pipes
       if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - SPAWN_RATE) {
         const lastPipeX = pipes.length > 0 ? pipes[pipes.length - 1].x : canvas.width;
         pipes.push(new Pipe(lastPipeX));
@@ -146,8 +194,7 @@
         if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + pipes[i].width) {
           if (bird.y < pipes[i].height || bird.y + bird.height > pipes[i].height + pipes[i].gap) {
             gameOver = true;
-            showRestartButton();
-            alert('Game Over! Your score: ' + score);
+            gameOverMessage(); // Display game over message on the canvas
           }
         }
 
@@ -155,6 +202,7 @@
         if (pipes[i].x + pipes[i].width < 0) {
           pipes.splice(i, 1);
           score++;
+          updateGameDifficulty(); // Increase difficulty based on score
         }
       }
 
@@ -164,20 +212,24 @@
       ctx.fillText('Score: ' + score, 10, 30);
     }
 
-    // Show the start button
-    function showStartButton() {
-      document.getElementById('startButton').style.display = 'block';
-    }
-
-    // Show the restart button
-    function showRestartButton() {
-      document.getElementById('restartButton').style.display = 'block';
-    }
-
-    // Hide buttons
-    function hideButtons() {
+    // Countdown timer before game starts
+    function startCountdown() {
       document.getElementById('startButton').style.display = 'none';
-      document.getElementById('restartButton').style.display = 'none';
+      gameStarted = false;
+
+      // Show a countdown on the screen
+      countdownInterval = setInterval(function() {
+        if (countdownTimer > 0) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+          ctx.fillStyle = 'black';
+          ctx.font = '30px Arial';
+          ctx.fillText(countdownTimer, canvas.width / 2 - 15, canvas.height / 2);
+          countdownTimer--;
+        } else {
+          clearInterval(countdownInterval); // Stop the countdown
+          startGame(); // Start the game after countdown
+        }
+      }, 1000);
     }
 
     // Start the game
@@ -189,6 +241,8 @@
       birdVelocity = 0;
       pipes = [];
       score = 0;
+      pipeSpeed = INITIAL_PIPE_SPEED; // Reset pipe speed
+      pipeGap = INITIAL_PIPE_GAP; // Reset pipe gap
       gameLoop();
     }
 
@@ -201,6 +255,8 @@
       birdVelocity = 0;
       pipes = [];
       score = 0;
+      pipeSpeed = INITIAL_PIPE_SPEED; // Reset pipe speed
+      pipeGap = INITIAL_PIPE_GAP; // Reset pipe gap
       gameLoop();
     }
 
@@ -220,9 +276,9 @@
       }
     }
 
-    // Start button click event
+    // Start button click event now triggers the countdown
     document.getElementById('startButton').addEventListener('click', function() {
-      startGame();
+      startCountdown();
     });
 
     // Restart button click event
@@ -232,3 +288,4 @@
   </script>
 </body>
 </html>
+
