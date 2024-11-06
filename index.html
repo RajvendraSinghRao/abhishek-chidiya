@@ -125,17 +125,15 @@
 
       // Draw pipes using the pipe image
       this.draw = function() {
-        // Draw the upper pipe (flipped)
+        // Draw the top pipe (flipped)
         ctx.save();
         ctx.translate(this.x, 0);  // Translate the context to the x-position for the pipe
+        ctx.scale(1, -1);  // Flip the context vertically for the top pipe
+        ctx.drawImage(pipeImage, 0, 0, 150, this.height);  // Draw the top pipe with image width 150px
+        ctx.restore();  // Reset the transformation (no flip for the bottom pipe)
 
-        // Draw the top pipe (with width set to 150px)
-        ctx.drawImage(pipeImage, 0, 0, 150, this.height);
-
-        // Draw the lower pipe (with width set to 150px)
-        ctx.drawImage(pipeImage, 0, this.height + this.gap, 150, canvas.height - (this.height + this.gap));
-        
-        ctx.restore();
+        // Draw the bottom pipe (normal)
+        ctx.drawImage(pipeImage, this.x, this.height + this.gap, 150, canvas.height - (this.height + this.gap));  // Bottom pipe
       };
 
       this.update = function() {
@@ -203,6 +201,7 @@
         pipes[i].draw();
         pipes[i].update();
 
+        // Correct collision detection based on pipe image width
         if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + 150) {
           if (bird.y < pipes[i].height || bird.y + bird.height > pipes[i].height + pipes[i].gap) {
             gameOver = true;
@@ -260,6 +259,7 @@
       startCountdown();
     }
 
+    // Key controls for flapping
     document.addEventListener('keydown', function(e) {
       if ((e.key === ' ' || e.key === 'ArrowUp') && !gameOver) {
         if (!gameStarted) return;
