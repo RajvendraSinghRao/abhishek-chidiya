@@ -78,11 +78,9 @@
     let countdownInterval;
 
     const birdImage = new Image();
-    const pipeImage = new Image();
     const backgroundImage = new Image();
 
     birdImage.src = 'bird1.png';  // Replace with your own image
-    pipeImage.src = 'pipe.png';  // Replace with your own image
     backgroundImage.src = 'background.jpg';  // Replace with your own image
 
     birdImage.onload = function() {
@@ -122,15 +120,16 @@
       this.height = Math.floor(Math.random() * (canvas.height - INITIAL_PIPE_GAP)) + 50;
       this.x = lastPipeX + PIPE_DISTANCE;  // Distance between pipes
       this.gap = INITIAL_PIPE_GAP;
-      this.width = 150;  // Set pipe width to 150px (image width)
+      this.width = 50;  // Set pipe width to 50px (no image, just rectangles)
 
-      // Draw pipes using the pipe image
+      // Draw pipes using solid green color
       this.draw = function() {
-        // Draw the top pipe (flipped)
-        ctx.drawImage(pipeImage, this.x + (this.width - 150) / 2, 0, 150, this.height);  // Center the image inside the 150px width pipe
+        // Draw the top pipe (solid green rectangle)
+        ctx.fillStyle = '#3e8e41';  // Green color
+        ctx.fillRect(this.x, 0, this.width, this.height);  // Top pipe
 
-        // Draw the bottom pipe (normal)
-        ctx.drawImage(pipeImage, this.x + (this.width - 150) / 2, this.height + this.gap, 150, canvas.height - (this.height + this.gap));  // Bottom pipe
+        // Draw the bottom pipe (solid green rectangle)
+        ctx.fillRect(this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap));  // Bottom pipe
       };
 
       this.update = function() {
@@ -199,14 +198,14 @@
         pipes[i].update();
 
         // Collision check with the bird
-        if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + 150) {
+        if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + pipes[i].width) {
           if (bird.y < pipes[i].height || bird.y + bird.height > pipes[i].height + pipes[i].gap) {
             gameOver = true;
             gameOverMessage();
           }
         }
 
-        if (pipes[i].x + 150 < 0) {
+        if (pipes[i].x + pipes[i].width < 0) {
           pipes.splice(i, 1);
           score++;
           updateGameDifficulty();
