@@ -62,10 +62,10 @@
     const GRAVITY = 0.10;
     const FLAP_STRENGTH = -4;
     const SPAWN_RATE = 100;
-    const PIPE_DISTANCE = 300;
+    const PIPE_DISTANCE = 300;  // The distance between consecutive pipes is set to 300px
     const INITIAL_PIPE_SPEED = 2;
     const PIPE_SPEED_INCREMENT = 0.1;
-    const INITIAL_PIPE_GAP = 200; // Increased gap between pipes
+    const INITIAL_PIPE_GAP = 200;
     const PIPE_GAP_DECREASE = 1;
 
     let birdY = canvas.height / 2;
@@ -85,7 +85,6 @@
     pipeImage.src = 'pipe.png'; 
     backgroundImage.src = 'background.jpg'; 
 
-    // Handle image load and display start button once bird image is loaded
     birdImage.onload = function() {
       showStartButton();  
     };
@@ -96,7 +95,7 @@
 
     // Background drawing function
     function drawBackground() {
-      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // Stretch background
+      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
     }
 
     // Bird object
@@ -120,24 +119,25 @@
 
     // Pipe constructor function
     function Pipe(lastPipeX) {
-      this.width = 50;  // Keep pipe width to 50px
       this.height = Math.floor(Math.random() * (canvas.height - INITIAL_PIPE_GAP)) + 50;
-      this.x = lastPipeX + PIPE_DISTANCE;
+      this.x = lastPipeX + PIPE_DISTANCE;  // Distance between pipes is 300px
       this.gap = INITIAL_PIPE_GAP;
 
-      // Draw pipes using the pipe image, with an upside-down image for the upper pipe
+      // Draw pipes using the pipe image
       this.draw = function() {
-        // Draw the upper pipe
-        ctx.save(); // Save the current context state
-        ctx.translate(this.x, 0); // Translate to the x position
-        ctx.drawImage(pipeImage, 0, 0, this.width, this.height); // Draw the top pipe
+        // Draw the upper pipe (flipped)
+        ctx.save();
+        ctx.translate(this.x, 0);  // Translate the context to the x-position for the pipe
 
-        // Draw the lower pipe
-        ctx.drawImage(pipeImage, 0, this.height + this.gap, this.width, canvas.height - (this.height + this.gap)); // Draw the bottom pipe
-        ctx.restore(); // Restore the original context state
+        // Draw the top pipe (with width set to 150px)
+        ctx.drawImage(pipeImage, 0, 0, 150, this.height);
+
+        // Draw the lower pipe (with width set to 150px)
+        ctx.drawImage(pipeImage, 0, this.height + this.gap, 150, canvas.height - (this.height + this.gap));
+        
+        ctx.restore();
       };
 
-      // Update pipe position
       this.update = function() {
         this.x -= pipeSpeed;
       };
@@ -150,7 +150,6 @@
       }
     }
 
-    // Show and hide buttons
     function showStartButton() {
       document.getElementById('startButton').style.display = 'block';
       document.getElementById('startButton').style.opacity = '1';
@@ -166,7 +165,6 @@
       document.getElementById('restartButton').style.display = 'none';
     }
 
-    // Game over logic
     function gameOverMessage() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = 'black';
@@ -179,11 +177,8 @@
       showRestartButton();  
     }
 
-    // Main game loop function
     function draw() {
-      // Draw background image
       drawBackground();
-
       bird.draw();
 
       birdVelocity += GRAVITY;
@@ -194,7 +189,7 @@
         bird.y = canvas.height - bird.height;
         if (!gameOver) {
           gameOver = true;
-          gameOverMessage(); 
+          gameOverMessage();
           return;
         }
       }
@@ -208,14 +203,14 @@
         pipes[i].draw();
         pipes[i].update();
 
-        if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + pipes[i].width) {
+        if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + 150) {
           if (bird.y < pipes[i].height || bird.y + bird.height > pipes[i].height + pipes[i].gap) {
             gameOver = true;
             gameOverMessage();
           }
         }
 
-        if (pipes[i].x + pipes[i].width < 0) {
+        if (pipes[i].x + 150 < 0) {
           pipes.splice(i, 1);
           score++;
           updateGameDifficulty();
@@ -227,15 +222,14 @@
       ctx.fillText('Score: ' + score, 10, 30);
     }
 
-    // Start countdown and game logic
     function startCountdown() {
-      document.getElementById('startButton').style.display = 'none';  
+      document.getElementById('startButton').style.display = 'none';
       gameStarted = false;
 
       countdownInterval = setInterval(function() {
         if (countdownTimer > 0) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          drawBackground(); // Re-draw background during countdown
+          drawBackground();
           ctx.fillStyle = 'black';
           ctx.font = '30px Arial';
           ctx.fillText(countdownTimer, canvas.width / 2 - 15, canvas.height / 2);
@@ -266,7 +260,6 @@
       startCountdown();
     }
 
-    // Key controls for flapping
     document.addEventListener('keydown', function(e) {
       if ((e.key === ' ' || e.key === 'ArrowUp') && !gameOver) {
         if (!gameStarted) return;
@@ -274,7 +267,6 @@
       }
     });
 
-    // Touch controls for flapping
     document.addEventListener('touchstart', function(e) {
       if (!gameStarted || gameOver) return;
       bird.flap();
