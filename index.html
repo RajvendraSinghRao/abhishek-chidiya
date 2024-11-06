@@ -65,7 +65,7 @@
     const PIPE_DISTANCE = 250;
     const INITIAL_PIPE_SPEED = 2;
     const PIPE_SPEED_INCREMENT = 0.1;
-    const INITIAL_PIPE_GAP = 200;
+    const INITIAL_PIPE_GAP = 300; // Increased gap between pipes
     const PIPE_GAP_DECREASE = 1;
 
     let birdY = canvas.height / 2;
@@ -81,7 +81,7 @@
     const pipeImage = new Image();
     const backgroundImage = new Image();
 
-    birdImage.src = 'bird1.png';
+    birdImage.src = 'bird1.jpg';
     pipeImage.src = 'pipe.png'; 
     backgroundImage.src = 'background.jpg'; 
 
@@ -120,7 +120,7 @@
 
     // Pipe constructor function
     function Pipe(lastPipeX) {
-      this.width = 50 * 3;  // Set pipe width to 150 (3 times the original width)
+      this.width = 50;  // Keep pipe width to 50px
       this.height = Math.floor(Math.random() * (canvas.height - INITIAL_PIPE_GAP)) + 50;
       this.x = lastPipeX + PIPE_DISTANCE;
       this.gap = INITIAL_PIPE_GAP;
@@ -131,11 +131,11 @@
         ctx.save(); // Save the current context state
         ctx.translate(this.x + this.width / 2, this.height); // Translate to the center of the top pipe
         ctx.scale(1, -1); // Flip the context vertically
-        ctx.drawImage(pipeImage, -this.width / 2, 0, this.width, this.height); // Draw the pipe image at the flipped position
+        ctx.drawImage(pipeImage, -150 / 2, 0, 150, this.height); // Draw the pipe image scaled to 150px width
         ctx.restore(); // Restore the original context state
 
         // Draw the lower pipe with normal orientation
-        ctx.drawImage(pipeImage, this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap));
+        ctx.drawImage(pipeImage, this.x, this.height + this.gap, 150, canvas.height - (this.height + this.gap));
       };
 
       // Update pipe position
