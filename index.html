@@ -121,12 +121,12 @@
       this.x = lastPipeX + PIPE_DISTANCE;
       this.gap = INITIAL_PIPE_GAP;
       this.pipeWidth = 40;  // Narrow pipe width (top and bottom pipes)
-      this.capWidth = 60;   // Wider cap for top and bottom
+      this.capWidth = 40;   // Wider cap for top and bottom
 
       // Draw pipes using solid colors
       this.draw = function() {
         // Draw the top pipe with cap
-        ctx.fillStyle = '#228B22';  // Dark green for top pipe
+        ctx.fillStyle = '#32CD32';  // Dark green for top pipe
         ctx.fillRect(this.x + (this.pipeWidth - this.capWidth) / 2, 0, this.capWidth, this.height); // Draw the cap
 
         // Draw the bottom pipe (same width as top pipe)
