@@ -62,7 +62,7 @@
     const GRAVITY = 0.10;
     const FLAP_STRENGTH = -4;
     const SPAWN_RATE = 100;
-    const PIPE_DISTANCE = 300;  // Distance between consecutive pipes
+    const PIPE_DISTANCE = 300;
     const INITIAL_PIPE_SPEED = 2;
     const PIPE_SPEED_INCREMENT = 0.1;
     const INITIAL_PIPE_GAP = 200;
@@ -80,8 +80,8 @@
     const birdImage = new Image();
     const backgroundImage = new Image();
 
-    birdImage.src = 'bird1.png';  // Replace with your own image
-    backgroundImage.src = 'background.jpg';  // Replace with your own image
+    birdImage.src = 'bird1.png';  
+    backgroundImage.src = 'background.jpg';
 
     birdImage.onload = function() {
       showStartButton();  
@@ -118,18 +118,22 @@
     // Pipe constructor function
     function Pipe(lastPipeX) {
       this.height = Math.floor(Math.random() * (canvas.height - INITIAL_PIPE_GAP)) + 50;
-      this.x = lastPipeX + PIPE_DISTANCE;  // Distance between pipes
+      this.x = lastPipeX + PIPE_DISTANCE;
       this.gap = INITIAL_PIPE_GAP;
-      this.width = 50;  // Set pipe width to 50px (no image, just rectangles)
+      this.width = 60;  // Bottom pipe width (slightly larger than the top pipe)
+
+      // Top pipe is narrower than the bottom pipe
+      this.topWidth = 40;  // Make top pipe narrower
 
       // Draw pipes using solid green color
       this.draw = function() {
-        // Draw the top pipe (solid green rectangle)
-        ctx.fillStyle = '#3e8e41';  // Green color
-        ctx.fillRect(this.x, 0, this.width, this.height);  // Top pipe
+        // Draw the top pipe (narrower)
+        ctx.fillStyle = '#228B22';  // Dark green color for top pipe
+        ctx.fillRect(this.x, 0, this.topWidth, this.height);
 
-        // Draw the bottom pipe (solid green rectangle)
-        ctx.fillRect(this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap));  // Bottom pipe
+        // Draw the bottom pipe (wider)
+        ctx.fillStyle = '#32CD32';  // Lighter green color for bottom pipe
+        ctx.fillRect(this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap)); 
       };
 
       this.update = function() {
@@ -139,8 +143,8 @@
 
     function updateGameDifficulty() {
       if (score % 2 === 0) {
-        pipeSpeed += PIPE_SPEED_INCREMENT;  
-        pipeGap = Math.max(100, pipeGap - PIPE_GAP_DECREASE);  
+        pipeSpeed += PIPE_SPEED_INCREMENT;
+        pipeGap = Math.max(100, pipeGap - PIPE_GAP_DECREASE);
       }
     }
 
