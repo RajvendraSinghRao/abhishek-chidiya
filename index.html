@@ -62,7 +62,7 @@
     const GRAVITY = 0.10;
     const FLAP_STRENGTH = -4;
     const SPAWN_RATE = 100;
-    const PIPE_DISTANCE = 300;  // The distance between consecutive pipes is set to 300px
+    const PIPE_DISTANCE = 300;  // Distance between consecutive pipes
     const INITIAL_PIPE_SPEED = 2;
     const PIPE_SPEED_INCREMENT = 0.1;
     const INITIAL_PIPE_GAP = 200;
@@ -81,9 +81,9 @@
     const pipeImage = new Image();
     const backgroundImage = new Image();
 
-    birdImage.src = 'bird1.png';
-    pipeImage.src = 'pipe.png'; 
-    backgroundImage.src = 'background.jpg'; 
+    birdImage.src = 'bird1.png';  // Replace with your own image
+    pipeImage.src = 'pipe.png';  // Replace with your own image
+    backgroundImage.src = 'background.jpg';  // Replace with your own image
 
     birdImage.onload = function() {
       showStartButton();  
@@ -120,18 +120,13 @@
     // Pipe constructor function
     function Pipe(lastPipeX) {
       this.height = Math.floor(Math.random() * (canvas.height - INITIAL_PIPE_GAP)) + 50;
-      this.x = lastPipeX + PIPE_DISTANCE;  // Distance between pipes is 300px
+      this.x = lastPipeX + PIPE_DISTANCE;  // Distance between pipes
       this.gap = INITIAL_PIPE_GAP;
 
       // Draw pipes using the pipe image
       this.draw = function() {
         // Draw the top pipe (flipped)
-        ctx.save();
-        ctx.translate(this.x, 0);  // Translate the context to the x-position for the pipe
-        ctx.scale(1, -1);  // Flip the context vertically for the top pipe
-        ctx.drawImage(pipeImage, 0, 0, 150, this.height);  // Draw the top pipe with image width 150px
-        ctx.restore();  // Reset the transformation (no flip for the bottom pipe)
-
+        ctx.drawImage(pipeImage, this.x, 0, 150, this.height); // Normal orientation for top pipe
         // Draw the bottom pipe (normal)
         ctx.drawImage(pipeImage, this.x, this.height + this.gap, 150, canvas.height - (this.height + this.gap));  // Bottom pipe
       };
@@ -201,7 +196,7 @@
         pipes[i].draw();
         pipes[i].update();
 
-        // Correct collision detection based on pipe image width
+        // Collision check with the bird
         if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + 150) {
           if (bird.y < pipes[i].height || bird.y + bird.height > pipes[i].height + pipes[i].gap) {
             gameOver = true;
@@ -267,6 +262,7 @@
       }
     });
 
+    // Touch controls for flapping
     document.addEventListener('touchstart', function(e) {
       if (!gameStarted || gameOver) return;
       bird.flap();
