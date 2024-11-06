@@ -127,15 +127,14 @@
 
       // Draw pipes using the pipe image, with an upside-down image for the upper pipe
       this.draw = function() {
-        // Draw the upper pipe (flipped)
+        // Draw the upper pipe
         ctx.save(); // Save the current context state
-        ctx.translate(this.x + this.width / 2, this.height); // Translate to the center of the top pipe
-        ctx.scale(1, -1); // Flip the context vertically
-        ctx.drawImage(pipeImage, -150 / 2, 0, 150, this.height); // Draw the pipe image scaled to 150px width
-        ctx.restore(); // Restore the original context state
+        ctx.translate(this.x, 0); // Translate to the x position
+        ctx.drawImage(pipeImage, 0, 0, this.width, this.height); // Draw the top pipe
 
-        // Draw the lower pipe with normal orientation
-        ctx.drawImage(pipeImage, this.x, this.height + this.gap, 150, canvas.height - (this.height + this.gap));
+        // Draw the lower pipe
+        ctx.drawImage(pipeImage, 0, this.height + this.gap, this.width, canvas.height - (this.height + this.gap)); // Draw the bottom pipe
+        ctx.restore(); // Restore the original context state
       };
 
       // Update pipe position
