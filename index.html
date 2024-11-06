@@ -120,15 +120,22 @@
 
     // Pipe constructor function
     function Pipe(lastPipeX) {
-      this.width = 50;
+      this.width = 80;  // Increase the width of the pipe
       this.height = Math.floor(Math.random() * (canvas.height - INITIAL_PIPE_GAP)) + 50;
       this.x = lastPipeX + PIPE_DISTANCE;
       this.gap = INITIAL_PIPE_GAP;
 
-      // Draw pipes using the pipe image
+      // Draw pipes using the pipe image, with an upside-down image for the upper pipe
       this.draw = function() {
-        ctx.drawImage(pipeImage, this.x, 0, this.width, this.height);  // Top pipe
-        ctx.drawImage(pipeImage, this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap)); // Bottom pipe
+        // Draw the upper pipe (flipped)
+        ctx.save(); // Save the current context state
+        ctx.translate(this.x + this.width / 2, this.height); // Translate to the center of the top pipe
+        ctx.scale(1, -1); // Flip the context vertically
+        ctx.drawImage(pipeImage, -this.width / 2, 0, this.width, this.height); // Draw the pipe image at the flipped position
+        ctx.restore(); // Restore the original context state
+
+        // Draw the lower pipe
+        ctx.drawImage(pipeImage, this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap));
       };
 
       // Update pipe position
