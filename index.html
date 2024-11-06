@@ -120,18 +120,18 @@
       this.height = Math.floor(Math.random() * (canvas.height - INITIAL_PIPE_GAP)) + 50;
       this.x = lastPipeX + PIPE_DISTANCE;
       this.gap = INITIAL_PIPE_GAP;
-      this.width = 60;  // Bottom pipe width (slightly larger than the top pipe)
+      this.width = 60;  // Bottom pipe width (same as the top pipe)
 
-      // Top pipe is narrower than the bottom pipe
-      this.topWidth = 40;  // Make top pipe narrower
+      // Top pipe will be the same width as the bottom pipe
+      this.topWidth = this.width; 
 
       // Draw pipes using solid green color
       this.draw = function() {
-        // Draw the top pipe (narrower)
+        // Draw the top pipe (same width as bottom)
         ctx.fillStyle = '#228B22';  // Dark green color for top pipe
         ctx.fillRect(this.x, 0, this.topWidth, this.height);
 
-        // Draw the bottom pipe (wider)
+        // Draw the bottom pipe (same width as top)
         ctx.fillStyle = '#32CD32';  // Lighter green color for bottom pipe
         ctx.fillRect(this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap)); 
       };
