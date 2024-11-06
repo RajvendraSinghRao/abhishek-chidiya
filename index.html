@@ -122,13 +122,15 @@
       this.height = Math.floor(Math.random() * (canvas.height - INITIAL_PIPE_GAP)) + 50;
       this.x = lastPipeX + PIPE_DISTANCE;  // Distance between pipes
       this.gap = INITIAL_PIPE_GAP;
+      this.width = 150;  // Set pipe width to 150px (image width)
 
       // Draw pipes using the pipe image
       this.draw = function() {
         // Draw the top pipe (flipped)
-        ctx.drawImage(pipeImage, this.x, 0, 150, this.height); // Normal orientation for top pipe
+        ctx.drawImage(pipeImage, this.x + (this.width - 150) / 2, 0, 150, this.height);  // Center the image inside the 150px width pipe
+
         // Draw the bottom pipe (normal)
-        ctx.drawImage(pipeImage, this.x, this.height + this.gap, 150, canvas.height - (this.height + this.gap));  // Bottom pipe
+        ctx.drawImage(pipeImage, this.x + (this.width - 150) / 2, this.height + this.gap, 150, canvas.height - (this.height + this.gap));  // Bottom pipe
       };
 
       this.update = function() {
