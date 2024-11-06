@@ -120,7 +120,7 @@
 
     // Pipe constructor function
     function Pipe(lastPipeX) {
-      this.width = 50;  // Pipe width set to 50
+      this.width = 50 * 3;  // Set pipe width to 150 (3 times the original width)
       this.height = Math.floor(Math.random() * (canvas.height - INITIAL_PIPE_GAP)) + 50;
       this.x = lastPipeX + PIPE_DISTANCE;
       this.gap = INITIAL_PIPE_GAP;
