@@ -120,20 +120,18 @@
       this.height = Math.floor(Math.random() * (canvas.height - INITIAL_PIPE_GAP)) + 50;
       this.x = lastPipeX + PIPE_DISTANCE;
       this.gap = INITIAL_PIPE_GAP;
-      this.width = 60;  // Bottom pipe width (same as the top pipe)
+      this.pipeWidth = 40;  // Narrow pipe width (top and bottom pipes)
+      this.capWidth = 60;   // Wider cap for top and bottom
 
-      // Top pipe will be the same width as the bottom pipe
-      this.topWidth = this.width; 
-
-      // Draw pipes using solid green color
+      // Draw pipes using solid colors
       this.draw = function() {
-        // Draw the top pipe (same width as bottom)
-        ctx.fillStyle = '#228B22';  // Dark green color for top pipe
-        ctx.fillRect(this.x, 0, this.topWidth, this.height);
+        // Draw the top pipe with cap
+        ctx.fillStyle = '#228B22';  // Dark green for top pipe
+        ctx.fillRect(this.x + (this.pipeWidth - this.capWidth) / 2, 0, this.capWidth, this.height); // Draw the cap
 
-        // Draw the bottom pipe (same width as top)
-        ctx.fillStyle = '#32CD32';  // Lighter green color for bottom pipe
-        ctx.fillRect(this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap)); 
+        // Draw the bottom pipe (same width as top pipe)
+        ctx.fillStyle = '#32CD32';  // Lighter green for bottom pipe
+        ctx.fillRect(this.x, this.height + this.gap, this.pipeWidth, canvas.height - (this.height + this.gap));
       };
 
       this.update = function() {
@@ -202,14 +200,14 @@
         pipes[i].update();
 
         // Collision check with the bird
-        if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + pipes[i].width) {
+        if (bird.x + bird.width > pipes[i].x && bird.x < pipes[i].x + pipes[i].pipeWidth) {
           if (bird.y < pipes[i].height || bird.y + bird.height > pipes[i].height + pipes[i].gap) {
             gameOver = true;
             gameOverMessage();
           }
         }
 
-        if (pipes[i].x + pipes[i].width < 0) {
+        if (pipes[i].x + pipes[i].pipeWidth < 0) {
           pipes.splice(i, 1);
           score++;
           updateGameDifficulty();
