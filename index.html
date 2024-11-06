@@ -120,7 +120,7 @@
 
     // Pipe constructor function
     function Pipe(lastPipeX) {
-      this.width = 80;  // Increase the width of the pipe
+      this.width = 50;  // Pipe width set to 50
       this.height = Math.floor(Math.random() * (canvas.height - INITIAL_PIPE_GAP)) + 50;
       this.x = lastPipeX + PIPE_DISTANCE;
       this.gap = INITIAL_PIPE_GAP;
@@ -134,7 +134,7 @@
         ctx.drawImage(pipeImage, -this.width / 2, 0, this.width, this.height); // Draw the pipe image at the flipped position
         ctx.restore(); // Restore the original context state
 
-        // Draw the lower pipe
+        // Draw the lower pipe with normal orientation
         ctx.drawImage(pipeImage, this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap));
       };
 
